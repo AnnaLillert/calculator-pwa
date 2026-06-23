@@ -1,7 +1,7 @@
 {
   "name": "Калькулятор",
   "short_name": "Калькулятор",
-  "start_url": "/",
+  "start_url": "/calculator-pwa/",
   "display": "standalone",
   "background_color": "#2d0a1a",
   "theme_color": "#c2185b",
