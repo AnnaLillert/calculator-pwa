@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0px;
+            padding: 0px;
+        }
+        
+        body {
+            background-color: #2d0a1a;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            width: 500px;
+            margin: 50px auto;
+        }
+        .header {
+            grid-column: span 4;
+        }
+        .panel {
+            grid-column: span 4;
+        }
+        
+        .button {
+            background-color: #ffeb3b;
+            color: #c2185b;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            border: 2px solid #c2185b;
+        }
+        .button:hover {
+            background-color: #c2185b;
+            color: #ffeb3b;
+            border: 2px solid #ffeb3b;
+        }
+        
+        .panel {
+            font-family: "Arial";
+            font-size: 40px;
+            background-color: #c2185b;
+            color: #ffeb3b;
+            text-align: right;
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #ffeb3b;
+            font-weight: bold;
+        }
+        
+        .header {
+            background-color: #ffeb3b;
+            color: #c2185b;
+            text-align: center;
+            border-radius: 10px;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 20px;
+            border: 2px solid #c2185b;
+        }
+        /* Стиль для кнопки установки */
+        #install {
+            display: block;
+            margin: 10px auto;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #install[hidden] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button id="install" class="button" hidden>Установить на телефон</button>
+
+    <div class="container">
+        <div class="header">Калькулятор</div>
+        <div class="panel">0</div>
+        
+        <div class="button" onclick="doPercent()">%</div>
+        <div class="button" onclick="sbros('CE')">CE</div>
+        <div class="button" onclick="sbros('C')">C</div>
+        <div class="button" onclick="backspace()">←</div>
+
+        <div class="button" onclick="doFunc('1/x')">1/x</div>
+        <div class="button" onclick="doFunc('x^2')">x²</div>
+        <div class="button" onclick="doFunc('sqrt')">√x</div>
+        <div class="button" onclick="deistvClick('/')">/</div>
+
+        <div class="button" onclick="digitClick(7)">7</div>
+        <div class="button" onclick="digitClick(8)">8</div>
+        <div class="button" onclick="digitClick(9)">9</div>
+        <div class="button" onclick="deistvClick('*')">×</div>
+
+        <div class="button" onclick="digitClick(4)">4</div>
+        <div class="button" onclick="digitClick(5)">5</div>
+        <div class="button" onclick="digitClick(6)">6</div>
+        <div class="button" onclick="deistvClick('-')">-</div>
+
+        <div class="button" onclick="digitClick(1)">1</div>
+        <div class="button" onclick="digitClick(2)">2</div>
+        <div class="button" onclick="digitClick(3)">3</div>
+        <div class="button" onclick="deistvClick('+')">+</div>
+
+        <div class="button" onclick="doFunc('+/-')">+/-</div>
+        <div class="button" onclick="digitClick(0)">0</div>
+        <div class="button" onclick="zapyataya()">,</div>
+        <div class="button" onclick="ravnoClick()">=</div>
+    </div>
+
+    <script>
+        let a = 0;
+        let b = 0;
+        let deistv = "";
+        let newNumber = true;
+        let panel = document.querySelector(".panel");
+
+        function updatePanel(value) {
+            panel.innerHTML = value;
+        }
+
+        function digitClick(d) {
+            let text = panel.innerHTML;
+            if (newNumber) {
+                text = String(d);
+                newNumber = false;
+            } else {
+                if (text === "0") text = "";
+                text = text + String(d);
+            }
+            updatePanel(text);
+        }
+
+        function zapyataya() {
+            let text = panel.innerHTML;
+            if (newNumber) {
+                text = "0,";
+                newNumber = false;
+            } else {
+                if (text.indexOf(",") === -1) {
+                    text = text + ",";
+                }
+            }
+            updatePanel(text);
+        }
+
+        function deistvClick(op) {
+            let text = panel.innerHTML;
+            a = parseFloat(text.replace(",", "."));
+            deistv = op;
+            newNumber = true;
+        }
+
+        function ravnoClick() {
+            let text = panel.innerHTML;
+            b = parseFloat(text.replace(",", "."));
+            let result = 0;
+
+            if (deistv === "+") {
+                result = a + b;
+            } else if (deistv === "-") {
+                result = a - b;
+            } else if (deistv === "*") {
+                result = a * b;
+            } else if (deistv === "/") {
+                if (b === 0) {
+                    updatePanel("Ошибка");
+                    a = 0;
+                    b = 0;
+                    deistv = "";
+                    newNumber = true;
+                    return;
+                }
+                result = a / b;
+            } else {
+                result = b;
+            }
+
+            result = Math.round(result * 1e10) / 1e10;
+            updatePanel(String(result).replace(".", ","));
+            a = result;
+            deistv = "";
+            newNumber = true;
+        }
+
+        function doFunc(func) {
+            let text = panel.innerHTML;
+            let num = parseFloat(text.replace(",", "."));
+            let result = num;
+
+            if (func === "1/x") {
+                if (num === 0) {
+                    updatePanel("Ошибка");
+                    newNumber = true;
+                    return;
+                }
+                result = 1 / num;
+            } else if (func === "x^2") {
+                result = num * num;
+            } else if (func === "sqrt") {
+                if (num < 0) {
+                    updatePanel("Ошибка");
+                    newNumber = true;
+                    return;
+                }
+                result = Math.sqrt(num);
+            } else if (func === "+/-") {
+                result = -num;
+            }
+
+            result = Math.round(result * 1e10) / 1e10;
+            updatePanel(String(result).replace(".", ","));
+            newNumber = true;
+        }
+
+        function doPercent() {
+            let text = panel.innerHTML;
+            let num = parseFloat(text.replace(",", "."));
+            let result = num / 100;
+            result = Math.round(result * 1e10) / 1e10;
+            updatePanel(String(result).replace(".", ","));
+            newNumber = true;
+        }
+
+        function backspace() {
+            if (newNumber) return;
+            let text = panel.innerHTML;
+            if (text.length > 1) {
+                text = text.slice(0, -1);
+            } else {
+                text = "0";
+                newNumber = true;
+            }
+            updatePanel(text);
+        }
+
+        function sbros(type) {
+            if (type === "CE") {
+                updatePanel("0");
+                newNumber = true;
+            } else if (type === "C") {
+                updatePanel("0");
+                a = 0;
+                b = 0;
+                deistv = "";
+                newNumber = true;
+            }
+        }
+    </script>
+
+    <script>
+        // Регистрируем Service Worker
+        if (typeof navigator.serviceWorker !== 'undefined') {
+            navigator.serviceWorker.register('serviceworker.js')
+                .then(function(registration) {
+                    console.log('Service Worker зарегистрирован, scope:', registration.scope);
+                })
+                .catch(function(error) {
+                    console.log('Ошибка регистрации Service Worker:', error);
+                });
+        }
+    </script>
+
+    <script>
+        // Логика кнопки установки
+        let installPrompt = null;
+        const installButton = document.querySelector("#install");
+
+        window.addEventListener("beforeinstallprompt", function(event) {
+            event.preventDefault();
+            installPrompt = event;
+            installButton.removeAttribute("hidden"); // показываем кнопку
+        });
+
+        installButton.addEventListener("click", async function() {
+            if (!installPrompt) {
+                return;
+            }
+            const result = await installPrompt.prompt();
+            alert(`Результат установки: ${result.outcome}`);
+            disableInAppInstallPrompt();
+        });
+
+        function disableInAppInstallPrompt() {
+            installPrompt = null;
+            installButton.setAttribute("hidden", "");
+        }
+
+        window.addEventListener("appinstalled", function() {
+            disableInAppInstallPrompt();
+        });
+    </script>
+</body>
+</html>
